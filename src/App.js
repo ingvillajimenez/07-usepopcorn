@@ -76,6 +76,18 @@ export default function App() {
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
         </Box>
+
+        {/* ///////////////////////////////////////////////////////////// */}
+        {/* Passing Elements as Props (Alternative to children) */}
+        {/* <Box element={<MovieList movies={movies} />} />
+        <Box
+          element={
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedMoviesList watched={watched} />
+            </>
+          }
+        /> */}
       </Main>
     </>
   );
