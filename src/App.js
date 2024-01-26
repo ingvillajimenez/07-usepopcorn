@@ -55,6 +55,7 @@ const KEY = "8ee8a3e7";
 ///////////////////////////////////
 // Splitting Components in Practice
 export default function App() {
+  const [query, setQuery] = useState("inception");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   /////////////////////////
@@ -63,7 +64,7 @@ export default function App() {
   //////////////////
   // Handling Errors
   const [error, setError] = useState("");
-  const query = "ssdsdfef";
+  const tempQuery = "interstellar";
 
   /////////////////////////////////
   // How NOT to Fetch Data in React
@@ -79,34 +80,66 @@ export default function App() {
   //     .then((data) => setMovies(data.Search));
   // }, []);
 
+  /*
+  useEffect(function () {
+    console.log("After initial render");
+  }, []);
+
+  useEffect(function () {
+    console.log("After every render");
+  });
+
+  useEffect(
+    function () {
+      console.log("D");
+    },
+    [query]
+  );
+
+  console.log("During render");
+  */
+
   //////////////////////////
   // Using an async Function
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError("");
 
-        if (!res.ok)
-          throw new Error("Something went wrong with fetching movies");
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
 
-        const data = await res.json();
+          if (!res.ok)
+            throw new Error("Something went wrong with fetching movies");
 
-        if (data.Response === "False") throw new Error("Movie not found");
+          const data = await res.json();
 
-        setMovies(data.Search);
-        console.log(data);
-      } catch (err) {
-        console.error(err.message);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+          if (data.Response === "False") throw new Error("Movie not found");
+
+          setMovies(data.Search);
+        } catch (err) {
+          console.error(err.message);
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-    fetchMovies();
-  }, []);
+
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+
+      fetchMovies();
+    },
+    ///////////////////////////////////////
+    // Syncronizing Queries With Movie Data
+    [query]
+  );
 
   ////////////////
   // Prop Drilling
@@ -115,7 +148,7 @@ export default function App() {
   return (
     <>
       <NavBar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
 
@@ -178,9 +211,7 @@ function Logo() {
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState("");
-
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
