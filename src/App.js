@@ -60,7 +60,10 @@ export default function App() {
   /////////////////////////
   // Adding a Loading State
   const [isLoading, setIsLoading] = useState(false);
-  const query = "interstellar";
+  //////////////////
+  // Handling Errors
+  const [error, setError] = useState("");
+  const query = "ssdsdfef";
 
   /////////////////////////////////
   // How NOT to Fetch Data in React
@@ -80,13 +83,27 @@ export default function App() {
   // Using an async Function
   useEffect(function () {
     async function fetchMovies() {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+
+        if (!res.ok)
+          throw new Error("Something went wrong with fetching movies");
+
+        const data = await res.json();
+
+        if (data.Response === "False") throw new Error("Movie not found");
+
+        setMovies(data.Search);
+        console.log(data);
+      } catch (err) {
+        console.error(err.message);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
     }
     fetchMovies();
   }, []);
@@ -103,7 +120,12 @@ export default function App() {
       </NavBar>
 
       <Main>
-        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
+        <Box>
+          {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
+        </Box>
 
         <Box>
           <WatchedSummary watched={watched} />
@@ -128,6 +150,14 @@ export default function App() {
 
 function Loader() {
   return <p className="loader">Loading...</p>;
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⛔️</span> {message}
+    </p>
+  );
 }
 
 function NavBar({ children }) {
