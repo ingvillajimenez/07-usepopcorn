@@ -11,7 +11,6 @@ const KEY = "8ee8a3e7";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   /////////////////////////
   // Adding a Loading State
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +20,14 @@ export default function App() {
   //////////////////
   // Selecting a Movie
   const [selectedId, setSelectedId] = useState(null);
+
+  //////////////////////////////////////////////////////////
+  // Initializing State With a Callback (Lazy Initial State)
+  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
 
   /////////////////////////////////
   // How NOT to Fetch Data in React
@@ -65,11 +72,20 @@ export default function App() {
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
+
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   //////////////////////////
   // Using an async Function
