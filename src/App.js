@@ -229,6 +229,14 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  //////////////////////////////////////////
+  // How NOT to Select DOM Elements in React
+  useEffect(function () {
+    const el = document.querySelector(".search");
+    console.log(el);
+    el.focus();
+  }, []);
+
   return (
     <input
       className="search"
