@@ -56,7 +56,7 @@ const KEY = "8ee8a3e7";
 ///////////////////////////////////
 // Splitting Components in Practice
 export default function App() {
-  const [query, setQuery] = useState("inception");
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   /////////////////////////
@@ -144,9 +144,8 @@ export default function App() {
           setMovies(data.Search);
           setError("");
         } catch (err) {
-          console.error(err.message);
-
           if (err.name !== "AbortError") {
+            console.log(err.message);
             setError(err.message);
           }
         } finally {
@@ -160,6 +159,7 @@ export default function App() {
         return;
       }
 
+      handleCloseMovie();
       fetchMovies();
 
       ////////////////////////////
@@ -389,6 +389,25 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onCloseMovie();
   }
 
+  ///////////////////////////////////////////
+  // One More Effect: Listening to a Keypress
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+
+      document.addEventListener("keydown", callback);
+
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie]
+  );
+
   ////////////////////////
   // Loading Movie Details
   useEffect(
@@ -418,7 +437,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       // Cleaning Up the Title
       return function () {
         document.title = "usePopcorn";
-        console.log(`Clean up effect for movie ${title}`);
+        // console.log(`Clean up effect for movie ${title}`);
       };
     },
     [title]
