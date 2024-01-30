@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -10,16 +11,10 @@ const KEY = "8ee8a3e7";
 // Splitting Components in Practice
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  /////////////////////////
-  // Adding a Loading State
-  const [isLoading, setIsLoading] = useState(false);
-  //////////////////
-  // Handling Errors
-  const [error, setError] = useState("");
   //////////////////
   // Selecting a Movie
   const [selectedId, setSelectedId] = useState(null);
+  const { movies, isLoading, error } = useMovies(query);
 
   //////////////////////////////////////////////////////////
   // Initializing State With a Callback (Lazy Initial State)
@@ -85,61 +80,6 @@ export default function App() {
       localStorage.setItem("watched", JSON.stringify(watched));
     },
     [watched]
-  );
-
-  //////////////////////////
-  // Using an async Function
-  useEffect(
-    function () {
-      const controller = new AbortController();
-
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError("");
-
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-            { signal: controller.signal }
-          );
-
-          if (!res.ok)
-            throw new Error("Something went wrong with fetching movies");
-
-          const data = await res.json();
-
-          if (data.Response === "False") throw new Error("Movie not found");
-
-          setMovies(data.Search);
-          setError("");
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            console.log(err.message);
-            setError(err.message);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      if (query.length < 3) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-
-      handleCloseMovie();
-      fetchMovies();
-
-      ////////////////////////////
-      // Cleaning Up Data Fetching
-      return function () {
-        controller.abort();
-      };
-    },
-    ///////////////////////////////////////
-    // Syncronizing Queries With Movie Data
-    [query]
   );
 
   ////////////////
